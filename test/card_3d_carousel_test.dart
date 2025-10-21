@@ -7,21 +7,17 @@ void main() {
   group('Card3DAnimation Widget Tests', () {
     testWidgets('should render without crashing', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Card3DAnimation(
-              totalCards: 78,
-            ),
-          ),
-        ),
+        MaterialApp(home: Scaffold(body: Card3DAnimation(totalCards: 78))),
       );
 
       expect(find.byType(Card3DAnimation), findsOneWidget);
     });
 
-    testWidgets('should handle card selection callback', (WidgetTester tester) async {
+    testWidgets('should handle card selection callback', (
+      WidgetTester tester,
+    ) async {
       bool cardSelected = false;
-      
+
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -61,13 +57,7 @@ void main() {
 
     testWidgets('should handle swipe gestures', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Card3DAnimation(
-              totalCards: 78,
-            ),
-          ),
-        ),
+        MaterialApp(home: Scaffold(body: Card3DAnimation(totalCards: 78))),
       );
 
       // Simulate a left swipe

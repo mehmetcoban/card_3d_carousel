@@ -10,9 +10,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Card 3D Carousel Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue),
       home: MyHomePage(),
     );
   }
@@ -29,9 +27,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int selectedCardNumber = 0;
 
   // Demo kart resimleri
-  final List<String> cardImages = [
-    'https://picsum.photos/300/400?random=1'
-  ];
+  final List<String> cardImages = ['https://picsum.photos/300/400?random=1'];
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ],
               ),
             ),
-          
+
           // 3D Kart Carousel
           Expanded(
             child: Card3DAnimation(
@@ -77,7 +73,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 setState(() {
                   // Don't set isCardSelected = true here, let animation complete first
                   selectedCardNumber = cardNumber;
-                  selectedCardImageUrl = cardImages[selectedCardNumber % cardImages.length];
+                  selectedCardImageUrl =
+                      cardImages[selectedCardNumber % cardImages.length];
                 });
               },
               onAnimationCompleted: () {
@@ -91,7 +88,7 @@ class _MyHomePageState extends State<MyHomePage> {
               },
             ),
           ),
-          
+
           // Reset butonu
           if (isCardSelected)
             Padding(
@@ -130,10 +127,7 @@ class _MyHomePageState extends State<MyHomePage> {
               Container(
                 height: 200,
                 width: 150,
-                child: Image.network(
-                  selectedCardImageUrl!,
-                  fit: BoxFit.cover,
-                ),
+                child: Image.network(selectedCardImageUrl!, fit: BoxFit.cover),
               ),
           ],
         ),

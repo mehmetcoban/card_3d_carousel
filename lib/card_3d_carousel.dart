@@ -4,33 +4,33 @@ import 'dart:ui';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 /// A customizable 3D card carousel with flip animations for Flutter.
-/// 
+///
 /// Perfect for tarot cards, game cards, or any card-based interface.
 /// Features smooth 3D animations, gesture support, and customizable appearance.
 class Card3DAnimation extends StatefulWidget {
   /// Total number of cards in the deck
   final int totalCards;
-  
+
   /// Callback triggered when a card is selected
   final VoidCallback? onCardSelected;
-  
+
   /// Callback triggered when card selection animation completes
   final VoidCallback? onAnimationCompleted;
-  
+
   /// Callback triggered when a card is selected, provides the selected card index
   final Function(int)? onCardSelectedWithIndex;
-  
+
   /// Whether the widget is currently animating (disables interactions)
   final bool isAnimating;
-  
+
   /// URL of the selected card image to display
   final String? selectedCardImageUrl;
-  
+
   /// Whether a card is currently selected
   final bool isCardSelected;
 
   /// Creates a 3D card carousel widget.
-  /// 
+  ///
   /// [totalCards] defaults to 156 cards.
   /// [isAnimating] disables user interactions when true.
   /// [isCardSelected] indicates if a card is currently selected.
@@ -63,7 +63,8 @@ class _Card3DAnimationState extends State<Card3DAnimation>
 
   final int animationDuration = 80; // Reduced from 150 to 80 (faster)
   // Total animation duration: Rise, Flip, Fall
-  final int selectionDuration = 2000; // 2 seconds for visible animation for better visibility
+  final int selectionDuration =
+      2000; // 2 seconds for visible animation for better visibility
   final double dragThreshold = 30.0; // Reduced from 50 to 30 (more sensitive)
 
   // Animation phases (percentages within the 0.0 to 1.0 duration)
@@ -76,15 +77,16 @@ class _Card3DAnimationState extends State<Card3DAnimation>
   void initState() {
     super.initState();
 
-    _selectionController = AnimationController(
-      duration: Duration(milliseconds: selectionDuration),
-      vsync: this,
-    )..addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        // Notify parent widget when animation is completed.
-        widget.onAnimationCompleted?.call();
-      }
-    });
+    _selectionController =
+        AnimationController(
+          duration: Duration(milliseconds: selectionDuration),
+          vsync: this,
+        )..addStatusListener((status) {
+          if (status == AnimationStatus.completed) {
+            // Notify parent widget when animation is completed.
+            widget.onAnimationCompleted?.call();
+          }
+        });
 
     _selectionAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _selectionController, curve: Curves.linear),
@@ -281,9 +283,11 @@ class _Card3DAnimationState extends State<Card3DAnimation>
 
     // Notify parent that selection is triggered. Parent will set isCardSelected to true.
     widget.onCardSelected?.call();
-    
+
     // Also send the current card index
-    final centerCard = cardDataList.firstWhere((card) => card.position == _CardPosition.center);
+    final centerCard = cardDataList.firstWhere(
+      (card) => card.position == _CardPosition.center,
+    );
     widget.onCardSelectedWithIndex?.call(centerCard.cardIndex + 1);
 
     // Start animation from 0 to 1 (exactly like your working code)
@@ -304,64 +308,63 @@ class _Card3DAnimationState extends State<Card3DAnimation>
 
     return GestureDetector(
       // onPanUpdate removed - no drag and hold
-      
+
       // Only for swipe (quick swipe) onPanEnd
-      onPanEnd:
-          isInteractionBlocked
-              ? null
-              : (details) {
-                if (isAnimating) {
-                  return;
+      onPanEnd: isInteractionBlocked
+          ? null
+          : (details) {
+              if (isAnimating) {
+                return;
+              }
+
+              const double velocityThreshold =
+                  100; // Reduced from 200 to 100 (more sensitive)
+              final deltaY = details.velocity.pixelsPerSecond.dy;
+              final deltaX = details.velocity.pixelsPerSecond.dx;
+
+              // 1. VERTICAL SWIPE (SELECTION)
+              // Card selection with upward swipe (WORKS FROM ANYWHERE)
+              if (deltaY < -velocityThreshold) {
+                _startSelectionAnimation(); // Select center card
+                return;
+              }
+
+              // 2. HORIZONTAL SWIPE (ROTATION)
+              // WORKS FROM ANYWHERE - You can swipe from side cards too
+              if (deltaX.abs() > velocityThreshold) {
+                // Calculate how many cards to swipe based on velocity
+                int cardCount = 1; // Default 1 card
+
+                if (deltaX.abs() > 2000) {
+                  cardCount = 10; // Very very fast swipe: 10 cards
+                } else if (deltaX.abs() > 1500) {
+                  cardCount = 8; // Very fast swipe: 8 cards
+                } else if (deltaX.abs() > 1000) {
+                  cardCount = 6; // Fast swipe: 6 cards
+                } else if (deltaX.abs() > 600) {
+                  cardCount = 4; // Medium speed swipe: 4 cards
+                } else if (deltaX.abs() > 300) {
+                  cardCount = 2; // Normal swipe: 2 cards
+                } else {
+                  cardCount = 1; // Slow swipe: 1 card
                 }
 
-                const double velocityThreshold = 100; // Reduced from 200 to 100 (more sensitive)
-                final deltaY = details.velocity.pixelsPerSecond.dy;
-                final deltaX = details.velocity.pixelsPerSecond.dx;
-
-                // 1. VERTICAL SWIPE (SELECTION)
-                // Card selection with upward swipe (WORKS FROM ANYWHERE)
-                if (deltaY < -velocityThreshold) {
-                  _startSelectionAnimation(); // Select center card
-                  return;
-                }
-
-                // 2. HORIZONTAL SWIPE (ROTATION)
-                // WORKS FROM ANYWHERE - You can swipe from side cards too
-                if (deltaX.abs() > velocityThreshold) {
-                  // Calculate how many cards to swipe based on velocity
-                  int cardCount = 1; // Default 1 card
-                  
-                  if (deltaX.abs() > 2000) {
-                    cardCount = 10; // Very very fast swipe: 10 cards
-                  } else if (deltaX.abs() > 1500) {
-                    cardCount = 8; // Very fast swipe: 8 cards
-                  } else if (deltaX.abs() > 1000) {
-                    cardCount = 6; // Fast swipe: 6 cards
-                  } else if (deltaX.abs() > 600) {
-                    cardCount = 4; // Medium speed swipe: 4 cards
-                  } else if (deltaX.abs() > 300) {
-                    cardCount = 2; // Normal swipe: 2 cards
+                // Add multiple cards to queue
+                for (int i = 0; i < cardCount; i++) {
+                  if (deltaX > 0) {
+                    _queueRotation('right');
                   } else {
-                    cardCount = 1; // Slow swipe: 1 card
-                  }
-                  
-                  // Add multiple cards to queue
-                  for (int i = 0; i < cardCount; i++) {
-                    if (deltaX > 0) {
-                      _queueRotation('right');
-                    } else {
-                      _queueRotation('left');
-                    }
+                    _queueRotation('left');
                   }
                 }
-              },
+              }
+            },
       // Also trigger selection when center card is tapped (added)
-      onTap:
-          isInteractionBlocked
-              ? null
-              : () {
-                _startSelectionAnimation();
-              },
+      onTap: isInteractionBlocked
+          ? null
+          : () {
+              _startSelectionAnimation();
+            },
 
       child: SizedBox(
         height: 400,
@@ -387,16 +390,15 @@ class _Card3DAnimationState extends State<Card3DAnimation>
             });
 
             return Stack(
-              children:
-                  sortedCardList
-                      .map(
-                        (cardData) => _buildCard(
-                          cardData,
-                          ValueKey(cardData.id),
-                          isInteractionBlocked,
-                        ),
-                      )
-                      .toList(),
+              children: sortedCardList
+                  .map(
+                    (cardData) => _buildCard(
+                      cardData,
+                      ValueKey(cardData.id),
+                      isInteractionBlocked,
+                    ),
+                  )
+                  .toList(),
             );
           },
         ),
@@ -415,8 +417,9 @@ class _Card3DAnimationState extends State<Card3DAnimation>
       key: key,
       // Pause animation during selection animation
       duration: Duration(
-        milliseconds:
-            widget.isCardSelected ? selectionDuration : animationDuration,
+        milliseconds: widget.isCardSelected
+            ? selectionDuration
+            : animationDuration,
       ),
       curve: Curves.easeOut,
       tween: _CardPositionTween(
@@ -449,17 +452,20 @@ class _Card3DAnimationState extends State<Card3DAnimation>
         // --- 2. Flip Animation (Center Card Only) ---
         double flipValue = 0.0;
         if (selectionValue > 0) {
-          if (selectionValue >= risePhaseEnd && selectionValue <= flipPhaseEnd) {
+          if (selectionValue >= risePhaseEnd &&
+              selectionValue <= flipPhaseEnd) {
             // 0.3 to 0.7 (40% duration) goes from 0 to 1
-            flipValue = (selectionValue - risePhaseEnd) / (flipPhaseEnd - risePhaseEnd);
+            flipValue =
+                (selectionValue - risePhaseEnd) / (flipPhaseEnd - risePhaseEnd);
             flipValue = Curves.easeInOut.transform(flipValue);
           } else if (selectionValue > flipPhaseEnd) {
             // After 0.7, flip value stays constant at 1.0 (180 degrees)
             flipValue = 1.0;
           }
         }
-        final double flipAngle = flipValue * math.pi; // Rotates from 0 to pi and stays there
-        
+        final double flipAngle =
+            flipValue * math.pi; // Rotates from 0 to pi and stays there
+
         // Debug: Print animation values (only when animating)
         if (isCenter && selectionValue > 0) {
           // Debug: Animation values
@@ -471,28 +477,34 @@ class _Card3DAnimationState extends State<Card3DAnimation>
         double tiltAngle = 0.0;
         if (selectionValue >= risePhaseEnd && selectionValue <= flipPhaseEnd) {
           // Tilt card during flip (first one direction, then back)
-          double tiltProgress = (selectionValue - risePhaseEnd) / (flipPhaseEnd - risePhaseEnd);
-          tiltAngle = math.sin(tiltProgress * math.pi) * 0.15; // Between -0.15 and +0.15 radians
+          double tiltProgress =
+              (selectionValue - risePhaseEnd) / (flipPhaseEnd - risePhaseEnd);
+          tiltAngle =
+              math.sin(tiltProgress * math.pi) *
+              0.15; // Between -0.15 and +0.15 radians
         }
 
         // --- 2.2. Scale Increase During Flip ---
         double selectionScale = 1.0;
         if (selectionValue > 0 && selectionValue < 1.0) {
           // Enlarge card during flip
-          selectionScale = 1.0 + (math.sin(selectionValue * math.pi) * 0.15); // Max 15% growth
+          selectionScale =
+              1.0 +
+              (math.sin(selectionValue * math.pi) * 0.15); // Max 15% growth
         }
 
         // --- 3. General Card Position (Drag removed) ---
-        final Matrix4 cardPositionMatrix =
-            Matrix4.identity()
-              ..setEntry(3, 2, 0.001)
-        ..translateByVector3(Vector3(
-          animatedPosition.translateX,
-          animatedPosition.translateY - riseOffset, // Rise added
-          animatedPosition.translateZ,
-        ))
-              ..rotateY(animatedPosition.rotateY)
-              ..scaleByVector3(Vector3.all(animatedPosition.scale));
+        final Matrix4 cardPositionMatrix = Matrix4.identity()
+          ..setEntry(3, 2, 0.001)
+          ..translateByVector3(
+            Vector3(
+              animatedPosition.translateX,
+              animatedPosition.translateY - riseOffset, // Rise added
+              animatedPosition.translateZ,
+            ),
+          )
+          ..rotateY(animatedPosition.rotateY)
+          ..scaleByVector3(Vector3.all(animatedPosition.scale));
 
         final double finalOpacity = animatedPosition.opacity;
 
@@ -504,18 +516,19 @@ class _Card3DAnimationState extends State<Card3DAnimation>
                 alignment: Alignment.center,
                 transform: cardPositionMatrix,
                 child: _Card(
-                        rotationAngle:
-                            isCenter
-                                ? flipAngle
-                                : 0, // Send angle for center card
-                        tiltAngle: isCenter ? tiltAngle : 0.0, // X axis tilt
-                        selectionScale: isCenter ? selectionScale : 1.0, // Scale during flip
-                        selectedCardImageUrl: widget.selectedCardImageUrl,
-                        cardNumber: cardData.cardIndex + 1,
-                        totalCards: widget.totalCards,
-                        isCenter: isCenter,
-                        isCardSelected: widget.isCardSelected,
-                      ),
+                  rotationAngle: isCenter
+                      ? flipAngle
+                      : 0, // Send angle for center card
+                  tiltAngle: isCenter ? tiltAngle : 0.0, // X axis tilt
+                  selectionScale: isCenter
+                      ? selectionScale
+                      : 1.0, // Scale during flip
+                  selectedCardImageUrl: widget.selectedCardImageUrl,
+                  cardNumber: cardData.cardIndex + 1,
+                  totalCards: widget.totalCards,
+                  isCenter: isCenter,
+                  isCardSelected: widget.isCardSelected,
+                ),
               ),
             ),
           ),
@@ -695,7 +708,7 @@ class _Card extends StatelessWidget {
         child: CircularProgressIndicator(color: Colors.white),
       );
     }
-    
+
     return Image.network(
       selectedCardImageUrl!,
       fit: BoxFit.contain,
@@ -706,7 +719,7 @@ class _Card extends StatelessWidget {
             color: Colors.white,
             value: loadingProgress.expectedTotalBytes != null
                 ? loadingProgress.cumulativeBytesLoaded /
-                    loadingProgress.expectedTotalBytes!
+                      loadingProgress.expectedTotalBytes!
                 : null,
           ),
         );
@@ -753,11 +766,7 @@ class _Card extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.auto_awesome,
-              size: 60,
-              color: Colors.amber,
-            ),
+            Icon(Icons.auto_awesome, size: 60, color: Colors.amber),
             SizedBox(height: 16),
             Text(
               'CARD',
@@ -785,8 +794,12 @@ class _Card extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Increase size when card is selected and real image is shown
-    final double cardWidth = isCardSelected && isCenter ? 223 : 180; // 350/280 * 180 ≈ 225
-    final double cardHeight = isCardSelected && isCenter ? 350 : 280; // Same as Step 3
+    final double cardWidth = isCardSelected && isCenter
+        ? 223
+        : 180; // 350/280 * 180 ≈ 225
+    final double cardHeight = isCardSelected && isCenter
+        ? 350
+        : 280; // Same as Step 3
 
     if (!isCenter) {
       // Non-center cards only show back face
@@ -803,12 +816,11 @@ class _Card extends StatelessWidget {
     final double angle = rotationAngle;
 
     // Card main rotation (0 to pi) + X axis tilt + Scale
-    final transform =
-        Matrix4.identity()
-          ..setEntry(3, 2, 0.001) // 3D perspective
-          ..rotateX(tiltAngle) // X axis tilt (perspective effect)
-          ..rotateY(angle) // Y axis rotation (flip)
-          ..scaleByVector3(Vector3.all(selectionScale)); // Enlarge during flip
+    final transform = Matrix4.identity()
+      ..setEntry(3, 2, 0.001) // 3D perspective
+      ..rotateX(tiltAngle) // X axis tilt (perspective effect)
+      ..rotateY(angle) // Y axis rotation (flip)
+      ..scaleByVector3(Vector3.all(selectionScale)); // Enlarge during flip
 
     return Transform(
       alignment: Alignment.center,

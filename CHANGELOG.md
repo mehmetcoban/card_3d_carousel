@@ -1,3 +1,7 @@
+## 1.0.3
+
+* Fixed Dart formatter issues
+
 ## 1.0.2
 
 * Fixed deprecated scale() method warnings
