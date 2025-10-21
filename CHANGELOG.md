@@ -1,3 +1,8 @@
+## 1.0.2
+
+* Fixed deprecated scale() method warnings
+* Replaced scale() with scaleByVector3() for better compatibility
+
 ## 1.0.1
 
 * Added comprehensive dartdoc documentation

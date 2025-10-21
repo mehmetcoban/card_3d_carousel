@@ -492,7 +492,7 @@ class _Card3DAnimationState extends State<Card3DAnimation>
           animatedPosition.translateZ,
         ))
               ..rotateY(animatedPosition.rotateY)
-              ..scale(animatedPosition.scale);
+              ..scaleByVector3(Vector3.all(animatedPosition.scale));
 
         final double finalOpacity = animatedPosition.opacity;
 
@@ -808,7 +808,7 @@ class _Card extends StatelessWidget {
           ..setEntry(3, 2, 0.001) // 3D perspective
           ..rotateX(tiltAngle) // X axis tilt (perspective effect)
           ..rotateY(angle) // Y axis rotation (flip)
-          ..scale(selectionScale); // Enlarge during flip
+          ..scaleByVector3(Vector3.all(selectionScale)); // Enlarge during flip
 
     return Transform(
       alignment: Alignment.center,
