@@ -3,19 +3,37 @@ import 'dart:math' as math;
 import 'dart:ui';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
-// ====================================================================
-// 1. MAIN WIDGET AND STATE MANAGEMENT (CONTINUOUS DRAG AND SELECTION)
-// ====================================================================
-
+/// A customizable 3D card carousel with flip animations for Flutter.
+/// 
+/// Perfect for tarot cards, game cards, or any card-based interface.
+/// Features smooth 3D animations, gesture support, and customizable appearance.
 class Card3DAnimation extends StatefulWidget {
+  /// Total number of cards in the deck
   final int totalCards;
+  
+  /// Callback triggered when a card is selected
   final VoidCallback? onCardSelected;
+  
+  /// Callback triggered when card selection animation completes
   final VoidCallback? onAnimationCompleted;
-  final Function(int)? onCardSelectedWithIndex; // New callback with card index
-  final bool isAnimating; // To disable interactions
+  
+  /// Callback triggered when a card is selected, provides the selected card index
+  final Function(int)? onCardSelectedWithIndex;
+  
+  /// Whether the widget is currently animating (disables interactions)
+  final bool isAnimating;
+  
+  /// URL of the selected card image to display
   final String? selectedCardImageUrl;
-  final bool isCardSelected; // Card selection trigger state
+  
+  /// Whether a card is currently selected
+  final bool isCardSelected;
 
+  /// Creates a 3D card carousel widget.
+  /// 
+  /// [totalCards] defaults to 156 cards.
+  /// [isAnimating] disables user interactions when true.
+  /// [isCardSelected] indicates if a card is currently selected.
   const Card3DAnimation({
     super.key,
     this.totalCards = 156,

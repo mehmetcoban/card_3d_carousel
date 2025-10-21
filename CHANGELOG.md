@@ -1,3 +1,10 @@
+## 1.0.1
+
+* Added comprehensive dartdoc documentation
+* Fixed deprecated method warnings
+* Enabled public_member_api_docs lint rule
+* Improved pub.dev score from 140 to 160 points
+
 ## 1.0.0
 
 * Initial release of Card 3D Carousel
